@@ -29,7 +29,7 @@
 extern const u16 gSpeciesToHoennPokedexNum[];
 extern const u16 gSpeciesToNationalPokedexNum[];
 extern const u8 gSpeciesNames[][POKEMON_NAME_LENGTH + 1];
-extern const u16 *const gLevelUpLearnsets[];
+extern const struct LevelUpMove *const gLevelUpLearnsets[];
 extern const u32 gTMHMLearnsets[][2];
 extern const u32 gTutorLearnsets[];
 extern const u16 gTutorMoves[];
@@ -86,6 +86,9 @@ json makeSpecimen(const int i) {
     if (gBaseStats[i].abilities[1] != ABILITY_NONE) {
         specimen["abilities"].push_back(abilityNames[gBaseStats[i].abilities[1]]);
     }
+    if (gBaseStats[i].abilityHidden != ABILITY_NONE) {
+        specimen["hidden_ability"] = abilityNames[gBaseStats[i].abilityHidden];
+    }
 
     specimen["catch_rate"] = gBaseStats[i].catchRate;
     specimen["experience_yield"] = gBaseStats[i].expYield;
@@ -127,10 +130,10 @@ json makeSpecimen(const int i) {
 
         /* generate level up map */
         json levelup = json::array();
-        for (int l = 0; gLevelUpLearnsets[i][l] != LEVEL_UP_END; l++) {
+        for (int l = 0; gLevelUpLearnsets[i][l].move != LEVEL_UP_END; l++) {
             json levelmove = json::object();
-            levelmove[std::to_string(gLevelUpLearnsets[i][l] >> 9)] =
-                moveNames[gLevelUpLearnsets[i][l] & 0x1FF];
+            levelmove[std::to_string(gLevelUpLearnsets[i][l].level)] =
+                moveNames[gLevelUpLearnsets[i][l].move];
             levelup.push_back(levelmove);
         }
         learnsets["levelup"] = levelup;
@@ -182,17 +185,23 @@ json makeSpecimen(const int i) {
 
     if (gSpeciesToNationalPokedexNum[i - 1] <= NATIONAL_DEX_COUNT) {
         const auto dexnum = gSpeciesToNationalPokedexNum[i - 1];
-        json pokedex_entry = json::object();
-        pokedex_entry["category"] = reinterpret_cast<const char *>(&gPokedexEntries[dexnum].categoryName[0]);
-        pokedex_entry["height"] = gPokedexEntries[dexnum].height;
-        pokedex_entry["weight"] = gPokedexEntries[dexnum].weight;
-        pokedex_entry["scale"] = gPokedexEntries[dexnum].pokemonScale;
-        pokedex_entry["offset"] = static_cast<s16>(gPokedexEntries[dexnum].pokemonOffset);
-        pokedex_entry["trainer_scale"] = gPokedexEntries[dexnum].trainerScale;
-        pokedex_entry["trainer_offset"] = static_cast<s16>(gPokedexEntries[dexnum].trainerOffset);
-        pokedex_entry["text"] = reinterpret_cast<const char *>(gPokedexEntries[dexnum].description);
+//        json pokedex_entry = json::object();
+//        pokedex_entry["category"] = reinterpret_cast<const char *>(&gPokedexEntries[dexnum].categoryName[0]);
+//        pokedex_entry["height"] = gPokedexEntries[dexnum].height;
+//        pokedex_entry["weight"] = gPokedexEntries[dexnum].weight;
+////        pokedex_entry["scale"] = gPokedexEntries[dexnum].pokemonScale;
+////        pokedex_entry["offset"] = static_cast<s16>(gPokedexEntries[dexnum].pokemonOffset);
+////        pokedex_entry["trainer_scale"] = gPokedexEntries[dexnum].trainerScale;
+////        pokedex_entry["trainer_offset"] = static_cast<s16>(gPokedexEntries[dexnum].trainerOffset);
+//        pokedex_entry["text"] = reinterpret_cast<const char *>(gPokedexEntries[dexnum].description);
+//
+//        pokedex["entry"]  = pokedex_entry;
 
-        pokedex["entry"]  = pokedex_entry;
+        pokedex["category"] = reinterpret_cast<const char *>(&gPokedexEntries[dexnum].categoryName[0]);
+        pokedex["height"] = gPokedexEntries[dexnum].height;
+        pokedex["weight"] = gPokedexEntries[dexnum].weight;
+        pokedex["text"] = reinterpret_cast<const char *>(gPokedexEntries[dexnum].description);
+        pokedex["body_color"] = bodyColorToString(gBaseStats[i].bodyColor);
     }
     specimen["pokedex"] = pokedex;
 
@@ -307,9 +316,11 @@ json makeSpecimen(const int i) {
 //                break;
             case EVO_MEGA_EVOLUTION:
                 evo["mega"] = true;
+                evo["target"] += "_MEGA";
                 break;
             case EVO_MOVE_MEGA_EVOLUTION:
                 evo["mega"] = moveNames[gEvolutionTable[i][e].param];
+                evo["target"] += "_MEGA";
                 break;
             case EVO_MAPSEC:
             case EVO_SPECIFIC_MAP:
@@ -328,8 +339,6 @@ json makeSpecimen(const int i) {
         evo["target"] = reinterpret_cast<const char *>(gSpeciesNames[gEvolutionTable[i][e].targetSpecies]);
         specimen["evolution"].push_back(evo);
     }
-
-    specimen["body_color"] = bodyColorToString(gBaseStats[i].bodyColor);
 
     json gfx = json::object();
     gfx["icon_palette"] = gMonIconPaletteIndices[i];
