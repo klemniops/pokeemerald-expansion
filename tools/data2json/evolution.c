@@ -5,7 +5,6 @@
 #include "constants/moves.h"
 #include "constants/items.h"
 #include "constants/pokemon.h"
-#include "constants/pokemon_config.h"
 #include "constants/region_map_sections.h"
 #include "constants/species.h"
 
