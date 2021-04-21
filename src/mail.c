@@ -1,5 +1,6 @@
 #include "global.h"
 #include "mail.h"
+#include "constants/item.h"
 #include "constants/items.h"
 #include "main.h"
 #include "overworld.h"

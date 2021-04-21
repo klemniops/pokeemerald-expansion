@@ -32,6 +32,7 @@
 #include "constants/battle_string_ids.h"
 #include "constants/songs.h"
 #include "constants/rgb.h"
+#include "constants/item.h"
 #include "constants/items.h"
 
 struct EvoInfo

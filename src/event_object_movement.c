@@ -25,6 +25,7 @@
 #include "constants/event_object_movement.h"
 #include "constants/event_objects.h"
 #include "constants/field_effects.h"
+#include "constants/item.h"
 #include "constants/items.h"
 #include "constants/mauville_old_man.h"
 #include "constants/trainer_types.h"
